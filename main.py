@@ -54,7 +54,8 @@ class Selenium:
             f.write(f'{seed}\n')
 
         except Exception as e:
-            print(f"No element after {timeout} seconds of waiting!!!")
+            print(f"No seed phase after {timeout} seconds of waiting!!!")
+            self.driver.quit()
 
             return None
         if element is not None:
@@ -74,7 +75,7 @@ class Selenium:
             self.driver.find_element(By.XPATH, path).send_keys(text)
 
         except Exception as e:
-            print(f"No element after {timeout} seconds of waiting!!!")
+            print(f"No input after {timeout} seconds of waiting!!!\n{path}")
             return None
         if element is not None:
             time.sleep(delay)
@@ -94,7 +95,7 @@ class Selenium:
             self.driver.find_element(By.XPATH, path).click()
 
         except Exception as e:
-            print(f"No element after {timeout} seconds of waiting!!!")
+            print(f"No element after {timeout} seconds of waiting!!!\n{path}")
             return None
 
     def refresh(self):
@@ -172,15 +173,15 @@ class Myria(Metamask):
         while True:
             try:
                 self.take_element('//*[@id="radix-7"]/div/div/button', timeout=3)
-                self.take_element('//*[@id="__next"]/div[2]/div/div/div[2]/div[2]/div/div[1]/div/div/button')
+                self.take_element('//*[@id="__next"]/div[2]/div/div/div[2]/div[2]/div/div[1]/div/div/button', 3)
                 time.sleep(5)
                 if len(self.driver.window_handles) > 1:
                     self.driver.switch_to.window(self.driver.window_handles[-1])
-                    self.take_element('//*[@id="app-content"]/div/div[2]/div/div[2]/div[4]/div[2]/button[2]', 5)
-                    self.take_element('//*[@id="app-content"]/div/div[2]/div/div[2]/div[2]/div[2]/footer/button[2]', 5)
+                    self.take_element('//*[@id="app-content"]/div/div[2]/div/div[2]/div[4]/div[2]/button[2]', 3)
+                    self.take_element('//*[@id="app-content"]/div/div[2]/div/div[2]/div[2]/div[2]/footer/button[2]', 3)
                     time.sleep(3)
                     self.driver.switch_to.window(self.driver.window_handles[-1])
-                    self.take_element('//*[@id="app-content"]/div/div[2]/div/div[3]/button[2]', 5)
+                    self.take_element('//*[@id="app-content"]/div/div[2]/div/div[3]/button[2]', 3)
                     time.sleep(3)
                 self.driver.switch_to.window(self.driver.window_handles[-1])
                 button = self.driver.find_element(By.XPATH, '//*[@id="__next"]/div[2]/div/div/div[2]/div[2]/div/div[1]/div/div/div/div[1]/div[2]/div/div[5]/button')
@@ -190,7 +191,7 @@ class Myria(Metamask):
                     ac.move_to_element(button).perform()
                     time.sleep(0.1)
                     ac.click().perform()
-                self.take_element('//*[@id="radix-30"]/div/div/div/div/div[1]/button')
+                self.take_element('//*[@id="radix-30"]/div/div/div/div/div[1]/button', 3)
                 break
             except Exception as e:
                 time.sleep(10)
@@ -213,16 +214,22 @@ class Myria(Metamask):
         self.send_key(u'\ue007')
         # self.take_element('//*[@id="radix-1"]/div/div[2]/form/button')
         while True:
-            time.sleep(5)
-            username_input = self.driver.find_elements(By.XPATH, '//*[@id="radix-1"]/div/div[2]/form/div[2]/div[1]/div/div/input')
-            if len(username_input) == 1:
-                self.driver.find_element(By.XPATH, '//*[@id="radix-1"]/div/div[2]/form/div[2]/div[1]/div/div/input').clear()
-                self.send_text('//*[@id="radix-1"]/div/div[2]/form/div[2]/div[1]/div/div/input',
-                               f'{random.choice(password_list)}{random.randint(0, 999)}')
-                # self.take_element('//*[@id="radix-1"]/div/div[2]/form/button')
+            try:
+                time.sleep(5)
+                self.driver.maximize_window()
+                username_input = self.driver.find_elements(By.XPATH, '//*[@id="radix-1"]/div/div[2]/form/div[2]/div[1]/div/div/input')
+                if len(username_input) == 1:
+                    self.driver.find_element(By.XPATH, '//*[@id="radix-1"]/div/div[2]/form/div[2]/div[1]/div/div/input').clear()
+                    self.send_text('//*[@id="radix-1"]/div/div[2]/form/div[2]/div[1]/div/div/input',
+                                   f'{random.choice(password_list)}{random.randint(0, 999)}', 3)
+                    # self.take_element('//*[@id="radix-1"]/div/div[2]/form/button')
+                    self.send_key(u'\ue007')
+                else:
+                    self.driver.minimize_window()
+                    break
+            except Exception as e:
                 self.send_key(u'\ue007')
-            else:
-                break
+                print(' ')
         def listener(message):
             link = str(message['text'])
             print(link)
